@@ -1,12 +1,61 @@
 ---
-import Topbar from '../components/Topbar.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import DocLayout from '../layouts/DocLayout.astro';
 ---
 
-<Layout>
-	<Topbar/>
-	<footer/>
-</Layout>
+<DocLayout title="Documentación Plataforma CELC">
+  <div class="py-8 space-y-8">
+    
+    <!-- Hero / Encabezado principal -->
+    <div class="text-center max-w-2xl mx-auto space-y-4">
+      <span class="text-5xl">🎓</span>
+      <h1 class="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+        Documentación de la Plataforma CELC
+      </h1>
+      <p class="text-lg text-slate-600 dark:text-slate-300">
+        Bienvenido al centro de ayuda y guías técnicas. Aprende a instalar la app, usar los perfiles y conocer la arquitectura del sistema.
+      </p>
+    </div>
+
+    <!-- Accesos Rápidos -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+      
+      <a href="/es/docs/login" class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 hover:border-indigo-500 dark:hover:border-indigo-400 transition-colors group">
+        <h3 class="font-semibold text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+          🔑 Inicio de Sesión & Acceso
+        </h3>
+        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
+          Guía paso a paso para acceder al portal con tu correo institucional.
+        </p>
+      </a>
+
+      <a href="/es/docs/instalacion-pwa" class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 hover:border-indigo-500 dark:hover:border-indigo-400 transition-colors group">
+        <h3 class="font-semibold text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+          📱 Instalar App (PWA)
+        </h3>
+        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
+          Cómo instalar la aplicación en iPhone (iOS), Android, Windows y Mac.
+        </p>
+      </a>
+
+      <a href="/es/docs/vistas-perfil" class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 hover:border-indigo-500 dark:hover:border-indigo-400 transition-colors group">
+        <h3 class="font-semibold text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+          👤 Vistas de Perfil por Rol
+        </h3>
+        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
+          Conoce qué herramientas tiene disponibles cada usuario (Estudiante, Maestro, Admin).
+        </p>
+      </a>
+
+      <a href="/es/docs/backend" class="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 hover:border-indigo-500 dark:hover:border-indigo-400 transition-colors group">
+        <h3 class="font-semibold text-lg text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+          ⚙️ Arquitectura Backend
+        </h3>
+        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
+          Información sobre la API, base de datos y modelo de servicios.
+        </p>
+      </a>
+
+    </div>
+
+  </div>
+</DocLayout>
