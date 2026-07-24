@@ -7,6 +7,8 @@ const docs = defineCollection({
   schema: z.object({
     title: z.string(),
     subtitle: z.string().optional(),
+    section: z.string().default('General'), // Sección para agrupar en el Sidebar
+    order: z.number().default(99),          // Orden de aparición
   }),
 });
 

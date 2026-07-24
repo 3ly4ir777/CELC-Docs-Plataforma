@@ -1,5 +1,5 @@
 ---
-title: "Instalar la Aplicación (PWA)"
+title: "Instalar App (PWA) 📱"
 subtitle: "Lleva la plataforma CELC en tu teléfono, tablet o computadora como una aplicación nativa."
 ---
 

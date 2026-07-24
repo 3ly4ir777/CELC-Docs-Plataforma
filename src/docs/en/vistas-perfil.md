@@ -1,5 +1,5 @@
 ---
-title: "Vistas de Perfil por Rol"
+title: "Profile Views by Role"
 subtitle: "Ejemplos de dashboards y paneles personalizados para Estudiantes, Docentes y Administradores."
 ---
 

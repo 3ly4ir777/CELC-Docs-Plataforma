@@ -1,6 +1,7 @@
 ---
-title: "Gestión de Usuarios (CRUD)"
+title: "User Management (CRUD) 🔒"
 subtitle: "Administración, creación y control de accesos para la plataforma CELC."
+section: "Management & API"
 ---
 
 > **🔒 Requiere Rol de Administrador:** Esta sección de la plataforma solo es accesible para usuarios autenticados con privilegios de nivel `Admin`.

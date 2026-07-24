@@ -1,50 +1,57 @@
 ---
+import { getCollection } from 'astro:content';
+
 const { pathname } = Astro.url;
 const isEnglish = pathname.startsWith('/en');
+const currentLang = isEnglish ? 'en' : 'es';
 
-// Prefijo de idioma dinámico (/es o /en)
-const lang = isEnglish ? 'en' : 'es';
+// 1. Obtener todos los documentos y filtrar por el idioma actual
+const allDocs = await getCollection('docs');
+const langDocs = allDocs.filter(doc => doc.id.startsWith(`${currentLang}/`));
+
+// 2. Agrupar documentos por su propiedad "section"
+const groupedDocs = langDocs.reduce((acc, doc) => {
+  const section = doc.data.section || 'General';
+  if (!acc[section]) acc[section] = [];
+  acc[section].push(doc);
+  return acc;
+}, {} as Record<string, typeof langDocs>);
+
+// 3. Ordenar los documentos dentro de cada sección según "order"
+Object.keys(groupedDocs).forEach(section => {
+  groupedDocs[section].sort((a, b) => (a.data.order || 99) - (b.data.order || 99));
+});
 ---
 
 <nav class="space-y-6 text-sm">
-  <div>
-    <h3 class="font-semibold text-slate-900 dark:text-slate-100 uppercase tracking-wider text-xs mb-2">
-      {isEnglish ? 'General Usage' : 'Uso General'}
-    </h3>
-    <ul class="space-y-1">
-      <li>
-        <a href={`/${lang}/docs/login`} class="block px-3 py-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
-          {isEnglish ? 'Login & Access' : 'Inicio de Sesión'}
-        </a>
-      </li>
-      <li>
-        <a href={`/${lang}/docs/instalacion-pwa`} class="block px-3 py-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
-          {isEnglish ? 'Install App (PWA) 📱' : 'Instalar App (PWA) 📱'}
-        </a>
-      </li>
-      <li>
-        <a href={`/${lang}/docs/vistas-perfil`} class="block px-3 py-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
-          {isEnglish ? 'Profile Views by Role' : 'Vistas de Perfil por Rol'}
-        </a>
-      </li>
-    </ul>
-  </div>
+  {Object.entries(groupedDocs).map(([section, docs]) => (
+    <div>
+      <h3 class="font-semibold text-slate-900 dark:text-slate-100 uppercase tracking-wider text-xs mb-2">
+        {section}
+      </h3>
+      <ul class="space-y-1">
+        {docs.map((doc) => {
+          // Extraemos el slug quitando el prefijo "es/" o "en/"
+          const slug = doc.id.replace(/^(es|en)\//, '');
+          const docUrl = `/${currentLang}/docs/${slug}`;
+          const isActive = pathname === docUrl;
 
-  <div>
-    <h3 class="font-semibold text-slate-900 dark:text-slate-100 uppercase tracking-wider text-xs mb-2">
-      {isEnglish ? 'Admin & API' : 'Administración & API'}
-    </h3>
-    <ul class="space-y-1">
-      <li>
-        <a href={`/${lang}/docs/crud-usuarios`} class="block px-3 py-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
-          {isEnglish ? 'User Management (CRUD) 🔒' : 'Gestión de Usuarios (CRUD) 🔒'}
-        </a>
-      </li>
-      <li>
-        <a href={`/${lang}/docs/backend`} class="block px-3 py-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
-          {isEnglish ? 'Backend & Architecture' : 'Backend & Arquitectura'}
-        </a>
-      </li>
-    </ul>
-  </div>
+          return (
+            <li>
+              <a 
+                href={docUrl} 
+                class={`block px-3 py-1.5 rounded-md transition-colors ${
+                  isActive 
+                    ? 'font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400' 
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
+              >
+                {doc.data.title}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  ))}
 </nav>

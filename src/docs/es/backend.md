@@ -1,6 +1,7 @@
 ---
 title: "Documentación de Backend"
 subtitle: "Cómo funciona la arquitectura del servidor y la API de la plataforma CELC."
+section: "Administración & API"
 ---
 
 ## Visión General

@@ -1,20 +1,26 @@
 ---
-// Obtenemos la ruta actual desde la petición de Astro
+import { getCollection } from 'astro:content';
+
 const { pathname } = Astro.url;
-
-// Detectamos si el usuario está actualmente en la versión en inglés
 const isEnglish = pathname.startsWith('/en');
+const currentLang = isEnglish ? 'en' : 'es';
 
-// Calculamos la ruta equivalente para el otro idioma
+// Obtenemos todos los documentos del idioma actual para la lista de búsqueda
+const allDocs = await getCollection('docs');
+const searchableDocs = allDocs
+  .filter(doc => doc.id.startsWith(`${currentLang}/`))
+  .map(doc => ({
+    title: doc.data.title,
+    subtitle: doc.data.subtitle || '',
+    url: `/${currentLang}/docs/${doc.id.replace(/^(es|en)\//, '')}`
+  }));
+
 let targetUrl = '#';
 if (isEnglish) {
-  // Si está en /en/docs/..., cambiamos a /es/docs/...
   targetUrl = pathname.replace(/^\/en/, '/es');
 } else if (pathname.startsWith('/es')) {
-  // Si está en /es/docs/..., cambiamos a /en/docs/...
   targetUrl = pathname.replace(/^\/es/, '/en');
 } else {
-  // Si está en la raíz (/), mandamos al idioma opuesto
   targetUrl = '/en/docs/login';
 }
 ---
@@ -22,38 +28,89 @@ if (isEnglish) {
 <header class="sticky top-0 z-50 w-full backdrop-blur border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80">
   <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
     
-    <!-- Logo y Nombre -->
+    <!-- Logo -->
     <div class="flex items-center gap-3">
-      <a href="/es/docs/login" class="flex items-center gap-2 font-bold text-lg text-indigo-600 dark:text-indigo-400">
+      <a href={`/${currentLang}/docs/login`} class="flex items-center gap-2 font-bold text-lg text-indigo-600 dark:text-indigo-400">
         <span class="text-2xl">🎓</span>
         <span>CELC <span class="text-slate-500 font-normal">Docs</span></span>
       </a>
     </div>
 
-    <!-- Buscador (Placeholder) -->
-    <div class="flex-1 max-w-md hidden sm:block">
+    <!-- Buscador Interactivo -->
+    <div class="flex-1 max-w-md relative hidden sm:block">
       <div class="relative">
         <input 
           type="text" 
+          id="doc-search-input"
           placeholder={isEnglish ? "Search documentation..." : "Buscar en la documentación..."} 
-          class="w-full pl-9 pr-4 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          autocomplete="off"
+          class="w-full pl-9 pr-4 py-1.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
         <span class="absolute left-3 top-2 text-slate-400 text-sm">🔍</span>
       </div>
+
+      <!-- Menú Flotante de Resultados -->
+      <div 
+        id="search-results" 
+        class="hidden absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl max-h-80 overflow-y-auto z-50 p-2 space-y-1"
+      >
+      </div>
     </div>
 
-    <!-- Selector de Idioma Dinámico -->
+    <!-- Idioma -->
     <div class="flex items-center gap-3 text-sm">
       <a 
         href={targetUrl}
         class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 font-medium transition-colors"
-        title={isEnglish ? "Cambiar a Español" : "Switch to English"}
       >
         <span>🌐</span>
         <span>{isEnglish ? 'EN' : 'ES'}</span>
-        <span class="text-xs text-slate-400">({isEnglish ? 'Switch to ES' : 'Cambiar a EN'})</span>
       </a>
     </div>
 
   </div>
 </header>
+
+<!-- Script para la lógica del buscador en cliente -->
+<script is:inline define:vars={{ searchableDocs }}>
+  const input = document.getElementById('doc-search-input');
+  const resultsContainer = document.getElementById('search-results');
+
+  if (input && resultsContainer) {
+    input.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase().trim();
+
+      if (!query) {
+        resultsContainer.classList.add('hidden');
+        resultsContainer.innerHTML = '';
+        return;
+      }
+
+      // Filtrar documentos que coincidan en título o subtítulo
+      const filtered = searchableDocs.filter(doc => 
+        doc.title.toLowerCase().includes(query) || 
+        doc.subtitle.toLowerCase().includes(query)
+      );
+
+      if (filtered.length === 0) {
+        resultsContainer.innerHTML = `<div class="p-3 text-xs text-slate-400 text-center">Sin resultados para "${query}"</div>`;
+      } else {
+        resultsContainer.innerHTML = filtered.map(doc => `
+          <a href="${doc.url}" class="block p-2 rounded-md hover:bg-indigo-50 dark:hover:bg-indigo-950/50 transition-colors">
+            <div class="font-semibold text-sm text-indigo-600 dark:text-indigo-400">${doc.title}</div>
+            <div class="text-xs text-slate-500 dark:text-slate-400 truncate">${doc.subtitle}</div>
+          </a>
+        `).join('');
+      }
+
+      resultsContainer.classList.remove('hidden');
+    });
+
+    // Cerrar al hacer clic afuera
+    document.addEventListener('click', (e) => {
+      if (!input.contains(e.target) && !resultsContainer.contains(e.target)) {
+        resultsContainer.classList.add('hidden');
+      }
+    });
+  }
+</script>
