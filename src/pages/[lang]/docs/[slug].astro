@@ -1,0 +1,45 @@
+---
+import { getCollection, render } from 'astro:content';
+import DocLayout from '../../../layouts/DocLayout.astro';
+
+// 1. Generamos las rutas dinámicas basadas en los archivos .md (ej: /es/docs/backend, /en/docs/backend)
+export async function getStaticPaths() {
+  const docs = await getCollection('docs');
+  
+  return docs.map((doc) => {
+    // doc.id será algo como "es/backend" o "en/backend"
+    const [lang, slug] = doc.id.split('/');
+    
+    return {
+      params: { lang, slug },
+      props: { doc },
+    };
+  });
+}
+
+const { doc } = Astro.props;
+const { title, subtitle } = doc.data;
+
+// 2. Renderizamos el contenido del archivo Markdown
+const { Content } = await render(doc);
+---
+
+<DocLayout title={title}>
+  <article class="prose dark:prose-invert max-w-none">
+    <header class="border-b border-slate-200 dark:border-slate-800 pb-6 mb-8">
+      <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">
+        {title}
+      </h1>
+      {subtitle && (
+        <p class="text-lg text-slate-600 dark:text-slate-400">
+          {subtitle}
+        </p>
+      )}
+    </header>
+
+    <!-- Aquí se inyecta todo el contenido traducido desde el Markdown -->
+    <div class="space-y-4">
+      <Content />
+    </div>
+  </article>
+  </DocLayout>
