@@ -49,7 +49,7 @@ if (isEnglish) {
         <span class="absolute left-3 top-2 text-slate-400 text-sm">🔍</span>
       </div>
 
-      <!-- Menú Flotante de Resultados -->
+      <!-- Resultados de búsqueda -->
       <div 
         id="search-results" 
         class="hidden absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl max-h-80 overflow-y-auto z-50 p-2 space-y-1"
@@ -57,8 +57,21 @@ if (isEnglish) {
       </div>
     </div>
 
-    <!-- Idioma -->
-    <div class="flex items-center gap-3 text-sm">
+    <!-- Acciones (Idioma + Botón Tema) -->
+    <div class="flex items-center gap-2 text-sm">
+      
+      <!-- Botón Modo Oscuro / Claro -->
+      <button 
+        id="theme-toggle" 
+        type="button" 
+        class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors"
+        aria-label="Cambiar Tema"
+      >
+        <span id="theme-toggle-dark-icon" class="hidden">🌙</span>
+        <span id="theme-toggle-light-icon" class="hidden">☀️</span>
+      </button>
+
+      <!-- Botón Idioma -->
       <a 
         href={targetUrl}
         class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 font-medium transition-colors"
@@ -66,20 +79,21 @@ if (isEnglish) {
         <span>🌐</span>
         <span>{isEnglish ? 'EN' : 'ES'}</span>
       </a>
+      
     </div>
 
   </div>
 </header>
 
-<!-- Script para la lógica del buscador en cliente -->
+<!-- Script para la lógica del buscador y del toggle de tema -->
 <script is:inline define:vars={{ searchableDocs }}>
+  // Lógica del buscador
   const input = document.getElementById('doc-search-input');
   const resultsContainer = document.getElementById('search-results');
 
   if (input && resultsContainer) {
     input.addEventListener('input', (e) => {
       const query = e.target.value.toLowerCase().trim();
-
       if (!query) {
         resultsContainer.classList.add('hidden');
         resultsContainer.innerHTML = '';
@@ -91,7 +105,6 @@ if (isEnglish) {
         doc.title.toLowerCase().includes(query) || 
         doc.subtitle.toLowerCase().includes(query)
       );
-
       if (filtered.length === 0) {
         resultsContainer.innerHTML = `<div class="p-3 text-xs text-slate-400 text-center">Sin resultados para "${query}"</div>`;
       } else {
@@ -102,7 +115,6 @@ if (isEnglish) {
           </a>
         `).join('');
       }
-
       resultsContainer.classList.remove('hidden');
     });
 
@@ -113,4 +125,35 @@ if (isEnglish) {
       }
     });
   }
+
+  // Lógica del Botón de Modo Oscuro / Claro
+  const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+  const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+  const themeToggleBtn = document.getElementById('theme-toggle');
+
+  function updateIcons() {
+    const isDark = document.documentElement.classList.contains('dark');
+    if (isDark) {
+      themeToggleLightIcon?.classList.remove('hidden');
+      themeToggleDarkIcon?.classList.add('hidden');
+    } else {
+      themeToggleDarkIcon?.classList.remove('hidden');
+      themeToggleLightIcon?.classList.add('hidden');
+    }
+  }
+
+  // Sincronizar ícono inicial
+  updateIcons();
+
+  themeToggleBtn?.addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+    
+    if (document.documentElement.classList.contains('dark')) {
+      localStorage.setItem('theme', 'dark');
+    } else {
+      localStorage.setItem('theme', 'light');
+    }
+
+    updateIcons();
+  });
 </script>

@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@custom-variant dark (&:where(.dark, .dark *));
 /* Aplica bordes redondeados, borde sutil y sombras a TODAS las imágenes del Markdown */
 .prose img {
   @apply rounded-xl border border-slate-200 dark:border-slate-700 shadow-md my-6 w-full object-cover;
