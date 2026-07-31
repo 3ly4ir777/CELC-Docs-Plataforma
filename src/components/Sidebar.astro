@@ -23,35 +23,88 @@ Object.keys(groupedDocs).forEach(section => {
 });
 ---
 
-<nav class="space-y-6 text-sm">
-  {Object.entries(groupedDocs).map(([section, docs]) => (
-    <div>
-      <h3 class="font-semibold text-slate-900 dark:text-slate-100 uppercase tracking-wider text-xs mb-2">
-        {section}
-      </h3>
-      <ul class="space-y-1">
-        {docs.map((doc) => {
-          // Extraemos el slug quitando el prefijo "es/" o "en/"
-          const slug = doc.id.replace(/^(es|en)\//, '');
-          const docUrl = `/${currentLang}/docs/${slug}`;
-          const isActive = pathname === docUrl;
+<!-- Overlay para cerrar en celular -->
+<div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden md:hidden"></div>
 
-          return (
-            <li>
-              <a 
-                href={docUrl} 
-                class={`block px-3 py-1.5 rounded-md transition-colors ${
-                  isActive 
-                    ? 'font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400' 
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                {doc.data.title}
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  ))}
-</nav>
+<!-- Sidebar Principal -->
+<aside 
+  id="sidebar-menu"
+  class="fixed md:sticky top-16 left-0 z-40 w-64 h-[calc(100vh-4rem)] overflow-y-auto border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 transition-transform duration-300 -translate-x-full md:translate-x-0"
+>
+  <nav class="space-y-4 text-sm pr-1">
+    {Object.entries(groupedDocs).map(([section, docs]) => {
+      const sectionId = `section-${section.toLowerCase().replace(/\s+/g, '-')}`;
+      const hasActiveChild = docs.some(doc => pathname === `/${currentLang}/docs/${doc.id.replace(/^(es|en)\//, '')}`);
+
+      return (
+        <div class="border-b border-slate-100 dark:border-slate-800/60 pb-3" id={sectionId}>
+          <!-- Encabezado con padding pr-3 para dar margen respecto al scrollbar -->
+          <button 
+            type="button" 
+            class="section-toggle-btn w-full flex items-center justify-between font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-xs py-1 pr-3 hover:text-red-700 dark:hover:text-red-400 transition-colors select-none"
+          >
+            <span class="truncate">{section}</span>
+            <span class="chevron-icon text-[10px] ml-2 text-slate-400 dark:text-slate-500 transform transition-transform duration-200">
+              {hasActiveChild ? '▼' : '▶'}
+            </span>
+          </button>
+
+          <!-- Lista de Documentos -->
+          <ul class={`section-content space-y-1 mt-2 pl-2 border-l-2 border-slate-100 dark:border-slate-800 ${hasActiveChild ? '' : 'hidden'}`}>
+            {docs.map((doc) => {
+              const slug = doc.id.replace(/^(es|en)\//, '');
+              const docUrl = `/${currentLang}/docs/${slug}`;
+              const isActive = pathname === docUrl;
+
+              return (
+                <li>
+                  <a 
+                    href={docUrl} 
+                    class={`block px-3 py-1.5 rounded-md transition-colors text-xs font-medium ${
+                      isActive 
+                        ? 'bg-red-50 dark:bg-red-950/50 text-red-700 dark:text-red-400 font-bold border-r-2 border-red-600' 
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
+                    }`}
+                  >
+                    {doc.data.title}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      );
+    })}
+  </nav>
+</aside>
+
+<script is:inline>
+  // Acordeón Desplegable
+  document.querySelectorAll('.section-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const content = btn.nextElementSibling;
+      const chevron = btn.querySelector('.chevron-icon');
+
+      if (content) {
+        content.classList.toggle('hidden');
+        if (chevron) {
+          chevron.textContent = content.classList.contains('hidden') ? '▶' : '▼';
+        }
+      }
+    });
+  });
+
+  // Listener Global para controlar la apertura desde el Topbar
+  const sidebar = document.getElementById('sidebar-menu');
+  const overlay = document.getElementById('sidebar-overlay');
+
+  function toggleMobileMenu() {
+    if (sidebar && overlay) {
+      sidebar.classList.toggle('-translate-x-full');
+      overlay.classList.toggle('hidden');
+    }
+  }
+
+  window.addEventListener('toggle-mobile-menu', toggleMobileMenu);
+  overlay?.addEventListener('click', toggleMobileMenu);
+</script>
