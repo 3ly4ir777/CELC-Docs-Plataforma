@@ -34,9 +34,9 @@ if (isEnglish) {
     
     <!-- Botón Hamburguesa (Móvil) + Logo -->
     <div class="flex items-center gap-3">
+      <!-- Botón sin onclick inline, el script del Sidebar lo maneja -->
       <button 
         id="mobile-menu-btn" 
-        onclick="window.dispatchEvent(new CustomEvent('toggle-mobile-menu'))"
         class="md:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg focus:outline-none cursor-pointer"
         aria-label="Abrir Menú">
         <span class="text-xl">☰</span>
@@ -107,8 +107,9 @@ if (isEnglish) {
   </div>
 </header>
 
-<!-- Script para la lógica del buscador y del toggle de tema -->
+<!-- Script del buscador y tema (sin nada del menú móvil) -->
 <script is:inline define:vars={{ searchableDocs }}>
+  // --- Buscador ---
   const input = document.getElementById('doc-search-input');
   const resultsContainer = document.getElementById('search-results');
   let selectedIndex = -1;
@@ -186,7 +187,7 @@ if (isEnglish) {
     });
   }
 
-  // Toggle Tema
+  // --- Toggle Tema ---
   const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
   const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
   const themeToggleBtn = document.getElementById('theme-toggle');
@@ -208,11 +209,5 @@ if (isEnglish) {
     document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
     updateIcons();
-  });
-
-  // Disparar evento para abrir/cerrar menú móvil en el Sidebar
-  const mobileBtn = document.getElementById('mobile-menu-btn');
-  mobileBtn?.addEventListener('click', () => {
-    window.dispatchEvent(new CustomEvent('toggle-mobile-menu'));
   });
 </script>

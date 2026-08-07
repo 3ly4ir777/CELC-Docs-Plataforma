@@ -24,12 +24,12 @@ Object.keys(groupedDocs).forEach(section => {
 ---
 
 <!-- Overlay para cerrar en celular -->
-<div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden md:hidden"></div>
+<div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden"></div>
 
 <!-- Sidebar Principal -->
 <aside 
   id="sidebar-menu"
-  class="fixed md:sticky top-16 left-0 z-40 w-64 h-[calc(100vh-4rem)] overflow-y-auto border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 transition-transform duration-300 -translate-x-full md:translate-x-0"
+  class="fixed md:sticky top-16 left-0 z-40 w-64 shrink-0 h-[calc(100vh-4rem)] overflow-y-auto border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 transition-transform duration-300 -translate-x-full md:translate-x-0"
 >
   <nav class="space-y-4 text-sm pr-1">
     {Object.entries(groupedDocs).map(([section, docs]) => {
@@ -79,7 +79,7 @@ Object.keys(groupedDocs).forEach(section => {
 </aside>
 
 <script is:inline>
-  // Acordeón Desplegable
+  // --- Acordeón de secciones ---
   document.querySelectorAll('.section-toggle-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const content = btn.nextElementSibling;
@@ -94,17 +94,59 @@ Object.keys(groupedDocs).forEach(section => {
     });
   });
 
-  // Listener Global para controlar la apertura desde el Topbar
-  const sidebar = document.getElementById('sidebar-menu');
-  const overlay = document.getElementById('sidebar-overlay');
+// --- Control del menú móvil (sidebar) ---
+const menuBtn = document.getElementById('mobile-menu-btn');
+const sidebar = document.getElementById('sidebar-menu');
+const overlay = document.getElementById('sidebar-overlay');
 
-  function toggleMobileMenu() {
-    if (sidebar && overlay) {
-      sidebar.classList.toggle('-translate-x-full');
-      overlay.classList.toggle('hidden');
-    }
+function openSidebar() {
+  if (!sidebar || !overlay) return;
+  // Forzar position fixed y visibilidad en móvil, ignorando ancestros con transform
+  sidebar.classList.remove('-translate-x-full');
+  sidebar.style.position = 'fixed';
+  sidebar.style.left = '0';
+  sidebar.style.top = '4rem'; // coincide con top-16
+  sidebar.style.width = '16rem'; // w-64
+  sidebar.style.zIndex = '40';
+  overlay.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSidebar() {
+  if (!sidebar || !overlay) return;
+  sidebar.classList.add('-translate-x-full');
+  // Limpiar estilos inline para que Tailwind vuelva a mandar en desktop
+  sidebar.style.position = '';
+  sidebar.style.left = '';
+  sidebar.style.top = '';
+  sidebar.style.width = '';
+  sidebar.style.zIndex = '';
+  overlay.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function toggleSidebar() {
+  if (!sidebar) return;
+  if (sidebar.classList.contains('-translate-x-full')) {
+    openSidebar();
+  } else {
+    closeSidebar();
   }
+}
 
-  window.addEventListener('toggle-mobile-menu', toggleMobileMenu);
-  overlay?.addEventListener('click', toggleMobileMenu);
+menuBtn?.addEventListener('click', toggleSidebar);
+overlay?.addEventListener('click', closeSidebar);
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && sidebar && !sidebar.classList.contains('-translate-x-full')) {
+    closeSidebar();
+  }
+});
+
+sidebar?.addEventListener('click', (e) => {
+  const link = e.target.closest('a');
+  if (link) {
+    closeSidebar();
+  }
+});
 </script>
